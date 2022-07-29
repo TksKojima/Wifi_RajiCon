@@ -16,14 +16,15 @@ int st_input = 0;
 
 WebServer server(80);
 const int led = 4;
-void handleRoot() {
 
- server.send(200, "text/html", index_html);
- 
+
+
+void handleRoot() { //ブラウザのUI
+  server.send(200, "text/html", index_html); 
 }
 
-void handleRC() {
-//  NoDat = 0;
+
+void handleRC() { //ブラウザのUIを操作した結果のJSからアクセスされる
   for (int i = 0; i < server.args(); i++) {
     int Val_i = server.arg(i).toInt();
     Serial.print(server.argName(i) + "=" + server.arg(i) + ", ");
@@ -53,6 +54,42 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
 }
 
+void setup_pin(){
+ pinMode(led, OUTPUT);
+ digitalWrite(led, LOW);
+}
+
+void setup_wifi(){
+ //WiFi.mode(WIFI_STA);
+ WiFi.mode(WIFI_AP);
+ //WiFi.begin(ssid, password);
+ WiFi.softAP(ssid, password, 3, 0, 4);
+ delay(200);
+ WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
+   
+
+ Serial.println("");
+ Serial.print("AP IP address: ");
+ Serial.print(WiFi.softAPIP());
+ Serial.println();
+ delay(100);
+   
+ if (MDNS.begin("esp32led")) {
+   Serial.println("MDNS responder started");
+ }
+ server.on("/", handleRoot);
+ server.on("/rc", handleRC);
+ 
+ server.on("/inline", []() {
+  server.send(200, "text/plain", "hello from esp8266!");
+ });
+ server.onNotFound(handleNotFound);
+ server.begin();
+ Serial.println("HTTP server started");
+
+
+}
+
 void setup_pwm(){
   ledcSetup(0, 12800, 8);
   ledcAttachPin(ledPin, 0);  
@@ -62,51 +99,26 @@ void loop_pwm(){
   static uint8_t brightness = 0;
   brightness = ( fow_input + 100 )/2;
   ledcWrite(0, brightness);
-
   
   dacWrite( 25, max( abs(fow_input), abs(st_input) ) * 255 /100 );
-
   delay(2);  
 }
+
+
+
+void setup(void) {
+
+ Serial.begin(115200);
+
+ setup_pin();
+ setup_wifi();
+ setup_pwm();
+ 
+}
+
 
 void loop(void) {
  server.handleClient();
  loop_pwm();
 
-}
-
-void setup(void) {
- pinMode(led, OUTPUT);
- digitalWrite(led, LOW);
- Serial.begin(115200);
- //WiFi.mode(WIFI_STA);
- WiFi.mode(WIFI_AP);
- //WiFi.begin(ssid, password);
- WiFi.softAP(ssid, password, 3, 0, 4);
-   delay(200);
-
- WiFi.softAPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
-   
-
- Serial.println("");
-  Serial.print("AP IP address: ");
-  Serial.print(WiFi.softAPIP());
-  Serial.println();
-   delay(100);
-   
- if (MDNS.begin("esp32led")) {
-   Serial.println("MDNS responder started");
- }
- server.on("/", handleRoot);
- server.on("/rc", handleRC);
- 
- server.on("/inline", []() {
- server.send(200, "text/plain", "hello from esp8266!");
- });
- server.onNotFound(handleNotFound);
- server.begin();
- Serial.println("HTTP server started");
-
- setup_pwm();
- 
 }
