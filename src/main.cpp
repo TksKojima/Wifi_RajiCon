@@ -261,8 +261,8 @@ void setup_ps3pad()
 
     Ps3.attach(ps3_notify);
     Ps3.attachOnConnect(ps3_onConnect);
-    Ps3.begin("F0:08:D1:D8:29:FE");
-    //Ps3.begin("24:6F:28:AA:A8:86");
+    //Ps3.begin("F0:08:D1:D8:29:FE");
+    Ps3.begin("C8:F0:9E:A2:4E:AE");
     Ps3.setPlayer(ctrlMode+1);
 
     
@@ -487,10 +487,15 @@ void loop_servo_pwm(){
   }
 
 
-  int inputPwm0 = calcServoDeg2Pwm( st_lpfed0 );
-  int inputPwm1 = calcServoDeg2Pwm( st_lpfed1 );
-  int inputPwm2 = calcServoDeg2Pwm( st_lpfed2 -9 );
-  int inputPwm3 = calcServoDeg2Pwm( st_lpfed3 -9 );
+  // int inputPwm0 = calcServoDeg2Pwm( st_lpfed0 +10);
+  // int inputPwm1 = calcServoDeg2Pwm( st_lpfed1 +3);
+  // int inputPwm2 = calcServoDeg2Pwm( st_lpfed2 -9 );
+  // int inputPwm3 = calcServoDeg2Pwm( st_lpfed3 -7 );
+
+  int inputPwm0 = calcServoDeg2Pwm( st_lpfed);
+  int inputPwm1 = calcServoDeg2Pwm( st_lpfed);
+  int inputPwm2 = calcServoDeg2Pwm( st_lpfed);
+  int inputPwm3 = calcServoDeg2Pwm( st_lpfed );  
 
   //Serial.print("inputPwm: ");
   //Serial.println(inputPwm);
